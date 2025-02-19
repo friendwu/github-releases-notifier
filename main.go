@@ -23,6 +23,7 @@ type Config struct {
 	Repositories    []string      `arg:"-r,separate"`
 	SlackHook       string        `arg:"env:SLACK_HOOK"`
 	IgnoreNonstable bool          `arg:"env:IGNORE_NONSTABLE"`
+	ReleasesFile    string        `arg:"env:RELEASES_FILE" default:"releases.json"`
 }
 
 // Token returns an oauth2 token or an error.
@@ -66,8 +67,9 @@ func main() {
 	httpClient := oauth2.NewClient(context.Background(), tokenSource)
 
 	checker := &Checker{
-		logger: logger,
-		client: githubv4.NewClient(httpClient),
+		logger:   logger,
+		client:   githubv4.NewClient(httpClient),
+		filepath: c.ReleasesFile,
 	}
 
 	// TODO: releases := make(chan Repository, len(c.Repositories))
@@ -89,5 +91,12 @@ func main() {
 			)
 			continue
 		}
+		level.Info(logger).Log(
+			"msg", "notification sent",
+			"repo", repository.Owner+"/"+repository.Name,
+			"version", repository.Release.Name,
+			"description", repository.Release.Description,
+			"url", repository.Release.URL,
+		)
 	}
 }

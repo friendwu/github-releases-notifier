@@ -23,16 +23,26 @@ type slackPayload struct {
 
 // Send a notification with a formatted message build from the repository.
 func (s *SlackSender) Send(repository Repository) error {
+	description := repository.Release.Description
+	if len(description) > 1024 {
+		description = description[:1024] + " ... (truncated)"
+	}
+
+	if description != "" {
+		description = "```\n" + description + "\n```"
+	}
+
 	payload := slackPayload{
 		Username:  "GitHub Releases",
 		IconEmoji: ":github:",
 		Text: fmt.Sprintf(
-			"<%s|%s/%s>: <%s|%s> released",
+			"<%s|%s/%s>: <%s|%s> released\n%s",
 			repository.URL.String(),
 			repository.Owner,
 			repository.Name,
 			repository.Release.URL.String(),
 			repository.Release.Name,
+			description,
 		),
 	}
 

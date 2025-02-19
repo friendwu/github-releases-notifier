@@ -2,11 +2,13 @@ version: '2'
 
 services:
   github-releases-notifier:
+    build: ..
+    container_name: github-releases-notifier
     restart: always
-    image: justwatch/github-releases-notifier
     environment:
-      - GITHUB_TOKEN=XXX
-      - SLACK_HOOK=https://hooks.slack.com/services/T02MASDF7/B6WERHYRZ/XXX
+      - GITHUB_TOKEN=<github token>
+      - SLACK_HOOK=<slack hook>
+      - RELEASES_FILE=/app/releases.json
     command:
       - '-r=golang/go'
       - '-r=justwatchcom/elasticsearch_exporter'
@@ -15,3 +17,6 @@ services:
       - '-r=kubernetes/minikube'
       - '-r=prometheus/prometheus'
       - '-r=shurcooL/githubql'
+
+    volumes:
+      - ./data:/app/
